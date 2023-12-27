@@ -1,11 +1,18 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "gitlab-plugin",
+	"name": "Gitlab Plugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Gitlab Issue and Wiki sync",
+	"author": "Ordinatus",
+	"authorUrl": "https://github.com/0rdinatus",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://www.buymeacoffee.com/ordinatus",
+		"GitHub Sponsor": "https://github.com/sponsors/0rdinatus",
+		"Patreon": "https://www.patreon.com/",
+		"Ko-Fi": "https://ko-fi.com/",
+		"Boosty": "https://boosty.to/ordinatus",
+		"Opencollective": "https://opencollective.com/"
+		}
 }
