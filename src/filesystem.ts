@@ -16,13 +16,8 @@ export default class Filesystem {
 		this.settings = settings;
 	}
 
-	private buildFolderName(issue: Issue): string
-	{
-		return this.settings.outputDir + '/' + issue.references + '/';
-	}
-
-	public createOutputDirectory(issue: Issue) {
-		this.vault.createFolder(this.buildFolderName(issue))
+	public createOutputDirectory() {
+		this.vault.createFolder(this.settings.outputDir)
 			.catch((error) => {
 				if (error.message !== 'Folder already exists.') {
 					log('Could not create output directory');
@@ -31,8 +26,8 @@ export default class Filesystem {
 		;
 	}
 
-	public purgeExistingIssues(issue: Issue) {
-		const outputDir: TAbstractFile|null = this.vault.getAbstractFileByPath(this.buildFolderName(issue));
+	public purgeExistingIssues() {
+		const outputDir: TAbstractFile|null = this.vault.getAbstractFileByPath(this.settings.outputDir);
 
 		if (outputDir instanceof TFolder) {
 			Vault.recurseChildren(outputDir, (existingFile: TAbstractFile) => {
@@ -67,10 +62,13 @@ export default class Filesystem {
 		;
 	}
 
-
-
 	private buildFileName(issue: Issue): string
 	{
-		return this.buildFolderName + '/' + issue.filename + '.md';
+		return this.settings.outputDir + '/' + issue.filename + '.md';
+	}
+
+	private FolderName(issue: Issue): string
+	{
+		return this.settings.outputDir + '/' + issue.references + '/';
 	}
 }
