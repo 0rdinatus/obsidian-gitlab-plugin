@@ -1,6 +1,6 @@
 import {Notice, Plugin} from 'obsidian';
 import {DEFAULT_SETTINGS, GitlabSettings, GitlabIssuesSettingTab} from './settings';
-import gitlabIcon from './assets/gitlab-icon.svg';
+import gitlabIcon from './assets/gitlab.svg';
 
 export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
@@ -28,7 +28,7 @@ export default class GitlabPlugin extends Plugin {
 			if (!this.iconAdded)
 			{
 				addIcon("gitlab", gitlabIcon);
-				this.addRibbonIcon('gitlab', 'Gitlab Issues', (evt: MouseEvent) => {
+				this.addRibbonIcon('gitlab', 'Sync Gitlab', (evt: MouseEvent) => {
 					this.fetchFromGitlab();
 				});
 				this.iconAdded = true;
@@ -66,14 +66,11 @@ export default class GitlabPlugin extends Plugin {
 	}
 
 	private createOutputFolder() {
-		const fs = new Filesystem(app.vault, this.settings);
-		fs.createOutputDirectory();
+
 	}
 
 	private fetchFromGitlab () {
 		new Notice('Updating issues from Gitlab');
-		const loader = new GitlabLoader(this.app, this.settings);
-		loader.loadIssues();
 	}
 
 	onunload() {
