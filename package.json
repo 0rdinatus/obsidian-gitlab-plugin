@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-gitlab-plugin",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "Sync Gitlab Issues and Wiki with Obsidian",
 	"main": "main.js",
 	"scripts": {

@@ -1,7 +1,7 @@
 import {App, PluginSettingTab, Setting, normalizePath} from "obsidian";
 import GitlabIssuesPlugin from "./main";
 
-export interface GitlabIssuesSettings {
+export interface GitlabSettings {
 	gitlabUrl: string;
 	gitlabToken: string;
 	templateFile: string;
@@ -11,7 +11,7 @@ export interface GitlabIssuesSettings {
 	gitlabApiUrl(): string;
 }
 
-export const DEFAULT_SETTINGS: GitlabIssuesSettings = {
+export const DEFAULT_SETTINGS: GitlabSettings = {
 	gitlabUrl: 'https://gitlab.com',
 	gitlabToken: '',
 	templateFile: '',

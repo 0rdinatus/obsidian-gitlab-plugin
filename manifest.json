@@ -1,7 +1,7 @@
 {
 	"id": "gitlab-plugin",
 	"name": "Gitlab Plugin",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Gitlab Issue and Wiki sync",
 	"author": "Ordinatus",
