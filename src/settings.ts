@@ -1,5 +1,5 @@
 import {App, PluginSettingTab, Setting, normalizePath} from "obsidian";
-import GitlabIssuesPlugin from "./main";
+import GitlabPlugin from "./main";
 
 export interface GitlabSettings {
 	gitlabUrl: string;
@@ -23,10 +23,10 @@ export const DEFAULT_SETTINGS: GitlabSettings = {
 	}
 };
 
-export class GitlabIssuesSettingTab extends PluginSettingTab {
-	plugin: GitlabIssuesPlugin;
+export class GitlabSettingTab extends PluginSettingTab {
+	plugin: GitlabPlugin;
 
-	constructor(app: App, plugin: GitlabIssuesPlugin) {
+	constructor(app: App, plugin: GitlabPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
