@@ -1,6 +1,7 @@
-import {Notice, Plugin} from 'obsidian';
+import {Notice, Plugin, addIcon} from 'obsidian';
 import {DEFAULT_SETTINGS, GitlabSettings, GitlabIssuesSettingTab} from './settings';
-import gitlabIcon from './assets/gitlab.svg';
+import gitlabIcon from './assets/gitlab-icon.svg';
+import { Gitlab, Projects } from '@gitbeaker/rest';
 
 export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
@@ -12,7 +13,7 @@ export default class GitlabPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new GitlabIssuesSettingTab(this.app, this));
 
-		if (this.settings.gitlabToken) {
+		if (this.settings.token) {
 			this.createOutputFolder();
 			this.addIconToLeftRibbon();
 			this.addCommandToPalette();

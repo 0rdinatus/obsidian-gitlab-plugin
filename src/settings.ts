@@ -2,8 +2,8 @@ import {App, PluginSettingTab, Setting, normalizePath} from "obsidian";
 import GitlabIssuesPlugin from "./main";
 
 export interface GitlabSettings {
-	gitlabUrl: string;
-	gitlabToken: string;
+	host: string;
+	token: string;
 	templateFile: string;
 	outputDir: string;
 	filter: string;
@@ -12,8 +12,8 @@ export interface GitlabSettings {
 }
 
 export const DEFAULT_SETTINGS: GitlabSettings = {
-	gitlabUrl: 'https://gitlab.com',
-	gitlabToken: '',
+	host: 'https://gitlab.com',
+	token: '',
 	templateFile: '',
 	outputDir: '/',
 	filter: 'state=opened',
@@ -42,9 +42,9 @@ export class GitlabIssuesSettingTab extends PluginSettingTab {
 		.setDesc('Use your own Gitlab instance instead of the public hosted Gitlab.')
 		.addText(text => text
 			.setPlaceholder('https://gitlab.com')
-			.setValue(this.plugin.settings.gitlabUrl)
+			.setValue(this.plugin.settings.host)
 			.onChange(async (value) => {
-				this.plugin.settings.gitlabUrl = value;
+				this.plugin.settings.host = value;
 				await this.plugin.saveSettings();
 			}));
 
@@ -53,9 +53,9 @@ export class GitlabIssuesSettingTab extends PluginSettingTab {
 			.setDesc('Create a personal access token in your Gitlab account and enter it here.')
 			.addText(text => text
 				.setPlaceholder('Token')
-				.setValue(this.plugin.settings.gitlabToken)
+				.setValue(this.plugin.settings.token)
 				.onChange(async (value) => {
-					this.plugin.settings.gitlabToken = value;
+					this.plugin.settings.token = value;
 					await this.plugin.saveSettings();
 					this.plugin.onload().then(
 						() => console.log('Gitlab Issues: Reloading plugin')
