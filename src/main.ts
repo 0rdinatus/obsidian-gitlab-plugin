@@ -1,5 +1,5 @@
 import {Notice, Plugin, addIcon} from 'obsidian';
-import {DEFAULT_SETTINGS, GitlabSettings, GitlabIssuesSettingTab} from './settings';
+import {DEFAULT_SETTINGS, GitlabSettings, GitlabSettingTab} from './settings';
 import gitlabIcon from './assets/gitlab-icon.svg';
 import { Gitlab, Projects } from '@gitbeaker/rest';
 
@@ -7,11 +7,11 @@ export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
 	startupTimeout: number|null = null;
 	automaticRefresh: number|null = null;
-	iconAdded = false;
+	iconAdded = true;
 
 	async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new GitlabIssuesSettingTab(this.app, this));
+		this.addSettingTab(new GitlabSettingTab(this.app, this));
 
 		if (this.settings.token) {
 			this.createOutputFolder();
