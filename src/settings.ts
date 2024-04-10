@@ -97,7 +97,7 @@ export class GitlabSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Show refresh Gitlab issues icon in left ribbon?')
+			.setName('Icon in left ribbon')
 			.addToggle(value => value
 				.setValue(this.plugin.settings.showIcon)
 				.onChange(async (value) => {

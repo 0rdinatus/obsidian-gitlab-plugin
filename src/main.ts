@@ -7,7 +7,6 @@ export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
 	startupTimeout: number|null = null;
 	automaticRefresh: number|null = null;
-	iconAdded = true;
 
 	async onload() {
 		await this.loadSettings();
@@ -25,15 +24,11 @@ export default class GitlabPlugin extends Plugin {
 	private addIconToLeftRibbon() {
 		if (this.settings.showIcon)
 		{
-			// Ensure we did not already add an icon
-			if (!this.iconAdded)
-			{
-				addIcon("gitlab", gitlabIcon);
-				this.addRibbonIcon('gitlab', 'Sync Gitlab', (evt: MouseEvent) => {
-					this.fetchFromGitlab();
-				});
-				this.iconAdded = true;
-			}
+			addIcon("gitlab", gitlabIcon);
+			this.addRibbonIcon('gitlab', 'Sync Gitlab', (evt: MouseEvent) => {
+				this.fetchFromGitlab();
+			});
+			this.iconAdded = true;
 		}
 	}
 
@@ -63,7 +58,7 @@ export default class GitlabPlugin extends Plugin {
 		}
 		this.automaticRefresh = this.registerInterval(window.setInterval(() => {
 			this.fetchFromGitlab();
-		}, 15 * 60 * 1000)); // every 15 minutes
+		}, 5 * 60 * 1000)); // every 5 minutes
 	}
 
 	private createOutputFolder() {
