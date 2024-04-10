@@ -7,6 +7,7 @@ export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
 	startupTimeout: number|null = null;
 	automaticRefresh: number|null = null;
+	iconAdded = false;
 
 	async onload() {
 		await this.loadSettings();
@@ -24,10 +25,15 @@ export default class GitlabPlugin extends Plugin {
 	private addIconToLeftRibbon() {
 		if (this.settings.showIcon)
 		{
-			addIcon("gitlab", gitlabIcon);
-			this.addRibbonIcon('gitlab', 'Sync Gitlab', (evt: MouseEvent) => {
-				this.fetchFromGitlab();
-			});
+			// Ensure we did not already add an icon
+			if (!this.iconAdded)
+			{
+				addIcon("gitlab", gitlabIcon);
+				this.addRibbonIcon('gitlab', 'Gitlab Issues', (evt: MouseEvent) => {
+					this.fetchFromGitlab();
+				});
+				this.iconAdded = true;
+			}
 		}
 	}
 
@@ -66,6 +72,16 @@ export default class GitlabPlugin extends Plugin {
 
 	private fetchFromGitlab () {
 		new Notice('Updating issues from Gitlab');
+
+		const GitlabApi = new Gitlab({
+			host: (this.settings.host),
+			token: (this.settings.token),
+		  });
+
+		  // Or using Promise-Then notation
+		  GitlabApi.Projects.all().then((projects) => {
+			console.log(projects);
+		  });		
 	}
 
 	onunload() {
