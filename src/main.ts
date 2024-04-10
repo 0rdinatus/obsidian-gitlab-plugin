@@ -28,7 +28,6 @@ export default class GitlabPlugin extends Plugin {
 			this.addRibbonIcon('gitlab', 'Sync Gitlab', (evt: MouseEvent) => {
 				this.fetchFromGitlab();
 			});
-			this.iconAdded = true;
 		}
 	}
 
