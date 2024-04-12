@@ -1,7 +1,7 @@
 import {Notice, Plugin, addIcon} from 'obsidian';
 import {DEFAULT_SETTINGS, GitlabSettings, GitlabSettingTab} from './settings';
 import gitlabIcon from './assets/gitlab-icon.svg';
-import { Gitlab, Projects } from '@gitbeaker/rest';
+import { Gitlab } from '@gitbeaker/rest';
 
 export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
@@ -76,18 +76,14 @@ export default class GitlabPlugin extends Plugin {
 		const GitlabApi = new Gitlab({
 			host: (this.settings.host),
 			token: (this.settings.token),
-		  });
-
-		  // Or using Promise-Then notation
-		  GitlabApi.Projects.all().then((projects) => {
-			console.log(projects);
-		  });		
+        });
+          const users = GitlabApi.Users.all();
+        {
+          console.log(users);
+        }
 	}
 
-	onunload() {
-
-	}
-
+    onunload() {}
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}

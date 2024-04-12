@@ -15,7 +15,7 @@
 	"author": "Ordinatus",
 	"license": "",
 	"devDependencies": {
-		"@gitbeaker/rest": "^40",
+		"@gitbeaker/rest": "^40.0.2",
 		"@types/jest": "^29.2.3",
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
