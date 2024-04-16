@@ -3,6 +3,8 @@ import {DEFAULT_SETTINGS, GitlabSettings, GitlabSettingTab} from './settings';
 import gitlabIcon from './assets/gitlab-icon.svg';
 import { Gitlab } from '@gitbeaker/rest';
 
+// const { Gitlab } = require('@gitbeaker/rest')
+
 export default class GitlabPlugin extends Plugin {
 	settings: GitlabSettings;
 	startupTimeout: number|null = null;

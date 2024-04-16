@@ -14,8 +14,15 @@
 	"keywords": [],
 	"author": "Ordinatus",
 	"license": "",
+	"Dependencies": {
+		"@gitbeaker/rest": "^40.0.3",
+		"builtin-modules": "3.3.0",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	},
 	"devDependencies": {
-		"@gitbeaker/rest": "^40.0.2",
+		"@gitbeaker/rest": "^40.0.3",
 		"@types/jest": "^29.2.3",
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",

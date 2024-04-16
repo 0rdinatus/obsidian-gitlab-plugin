@@ -1,6 +1,5 @@
 import esbuild from "esbuild";
 import process from "process";
-import builtins from "builtin-modules";
 
 const banner =
 `/*
@@ -19,39 +18,14 @@ const context = await esbuild.context({
 	bundle: true,
 	external: [
 		'obsidian',
-		'electron',
-		'@gitbeaker/rest',
-		'@codemirror/autocomplete',
-		'@codemirror/closebrackets',
-		'@codemirror/collab',
-		'@codemirror/commands',
-		'@codemirror/comment',
-		'@codemirror/fold',
-		'@codemirror/gutter',
-		'@codemirror/highlight',
-		'@codemirror/history',
-		'@codemirror/language',
-		'@codemirror/lint',
-		'@codemirror/matchbrackets',
-		'@codemirror/panel',
-		'@codemirror/rangeset',
-		'@codemirror/rectangular-selection',
-		'@codemirror/search',
-		'@codemirror/state',
-		'@codemirror/stream-parser',
-		'@codemirror/text',
-		'@codemirror/tooltip',
-		'@codemirror/view',
-		'@lezer/common',
-		'@lezer/highlight',
-		'@lezer/lr',
-		...builtins],
+		'@gitbeaker/rest'
+		],
 	format: "cjs",
 	loader: {
 		'.svg': 'text',
 	},
-	target: "es2018",
-	logLevel: "info",
+	target: "esnext",
+	logLevel: "debug",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "main.js",
