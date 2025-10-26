@@ -4,7 +4,16 @@
 
 [Obsidian](https://obsidian.md/) plugin to materialize [Gitlab](https://gitlab.com/) issues lists campatible with [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks/) and wiki in Obsidian notes.
 
-## Debuging
+## Development
+git clone plugin repo then cd to plugin folder
+Check `node --version` will be >= 16
+Install dependansies `npm i`
+Run `npm run build` will be create `build/main.js` build artifact.
+Copy `build/main.js` plugin to `ObsidianVault/.obsidian/plugins` for checking in Obsidian UI.
+
+### Debuging
+
+Obsidian debug console
 ```
 CTRL+SHIFT+I
 ```
