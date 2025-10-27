@@ -1,5 +1,4 @@
-import {App, PluginSettingTab, Setting, normalizePath} from "obsidian";
-import GitlabPlugin from "./main";
+import {App, Plugin, PluginSettingTab, Setting, normalizePath} from "obsidian";
 
 export interface GitlabSettings {
 	host: string;
@@ -24,9 +23,9 @@ export const DEFAULT_SETTINGS: GitlabSettings = {
 };
 
 export class GitlabSettingTab extends PluginSettingTab {
-	plugin: GitlabPlugin;
+	plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void> };
 
-	constructor(app: App, plugin: GitlabPlugin) {
+	constructor(app: App, plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void> }) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -54,13 +53,11 @@ export class GitlabSettingTab extends PluginSettingTab {
 			.addText(text => text
 				.setPlaceholder('Token')
 				.setValue(this.plugin.settings.token)
-				.onChange(async (value) => {
-					this.plugin.settings.token = value;
-					await this.plugin.saveSettings();
-					this.plugin.onload().then(
-						() => console.log('Gitlab Issues: Reloading plugin')
-					);
-				}));
+			.onChange(async (value) => {
+				this.plugin.settings.token = value;
+				await this.plugin.saveSettings();
+				console.log('Gitlab Issues: Token updated');
+			}));
 
 		new Setting(containerEl)
 			.setName('Template File')

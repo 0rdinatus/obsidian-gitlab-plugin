@@ -49,6 +49,7 @@ npm run build
   src/
     main.ts           # Plugin entry point, lifecycle management
     settings.ts       # Settings interface and defaults
+    assets/           # Graphics and other media
     commands/         # Command implementations
       command1.ts
       command2.ts
@@ -58,7 +59,7 @@ npm run build
     utils/           # Utility functions, helpers
       helpers.ts
       constants.ts
-    types.ts         # TypeScript interfaces and types
+    types.d.ts         # TypeScript interfaces and types
   ```
 - **Do not commit build artifacts**: Never commit `node_modules/`, `main.js`, or other generated files to version control.
 - Keep the plugin small. Avoid large dependencies. Prefer browser-compatible packages.

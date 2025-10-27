@@ -5,11 +5,17 @@
 [Obsidian](https://obsidian.md/) plugin to materialize [Gitlab](https://gitlab.com/) issues lists campatible with [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks/) and wiki in Obsidian notes.
 
 ## Development
-git clone plugin repo then cd to plugin folder
-Check `node --version` will be >= 16
-Install dependansies `npm i`
-Run `npm run build` will be create `build/main.js` build artifact.
-Copy `build/main.js` plugin to `ObsidianVault/.obsidian/plugins` for checking in Obsidian UI.
+
+- Clone this repo.
+- Make sure your NodeJS is at least v18+ (node --version).
+- `npm i` or `yarn` to install dependencies.
+- `npm run dev` to start compilation in watch mode.
+- `npm run build` to building production package
+
+### Manually installing the plugin
+
+Copy over `main.js`, `styles.css`, `manifest.json` to your vault VaultFolder/.obsidian/plugins/obsidian-gitlab-plugin/.
+
 
 ### Debuging
 
