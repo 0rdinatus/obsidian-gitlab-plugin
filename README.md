@@ -21,7 +21,7 @@ Copy over `main.js`, `styles.css`, `manifest.json` to your vault VaultFolder/.ob
 
 Obsidian debug console
 ```
-CTRL+SHIFT+I
+OPT+CMD+I
 ```
 ## TODO
 
