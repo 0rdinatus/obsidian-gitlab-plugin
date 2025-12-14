@@ -7,7 +7,6 @@ export interface GitlabSettings {
 	outputDir: string;
 	filter: string;
 	showIcon: boolean;
-	gitlabApiUrl(): string;
 }
 
 export const DEFAULT_SETTINGS: GitlabSettings = {
@@ -17,15 +16,16 @@ export const DEFAULT_SETTINGS: GitlabSettings = {
 	outputDir: '/',
 	filter: 'state=opened',
 	showIcon: true,
-	gitlabApiUrl(): string {
-		return `${this.host}/api/v4`;
-	}
 };
 
 export class GitlabSettingTab extends PluginSettingTab {
-	plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void> };
+	plugin: Plugin & { 
+		settings: GitlabSettings; 
+		saveSettings(): Promise<void>;
+		updateIconVisibility?(): void;
+	};
 
-	constructor(app: App, plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void> }) {
+	constructor(app: App, plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void>; updateIconVisibility?(): void }) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -100,6 +100,10 @@ export class GitlabSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.showIcon = value;
 					await this.plugin.saveSettings();
+					// Update icon visibility immediately
+					if (this.plugin.updateIconVisibility) {
+						this.plugin.updateIconVisibility();
+					}
 				}));
 
 		containerEl.createEl('h3', {text: 'More Information'});
