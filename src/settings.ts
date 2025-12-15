@@ -7,15 +7,21 @@ export interface GitlabSettings {
 	outputDir: string;
 	filter: string;
 	showIcon: boolean;
+	showIssues: boolean;
+	showKanban: boolean;
+	kanbanOutputDir: string;
 }
 
 export const DEFAULT_SETTINGS: GitlabSettings = {
 	host: 'https://gitlab.com',
 	token: '',
-	templateFile: '',
-	outputDir: '/',
+	templateFile: '/templates/Issue',
+	outputDir: '/Issues',
 	filter: 'state=opened',
 	showIcon: true,
+	showKanban: false,
+	showIssues: true,
+	kanbanOutputDir: '/Kanban/',
 };
 
 export class GitlabSettingTab extends PluginSettingTab {
@@ -29,13 +35,13 @@ export class GitlabSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
-
+	
 	display(): void {
 		const {containerEl} = this;
-
+		
 		containerEl.empty();
-		containerEl.createEl('h2', {text: 'GitLab Issues Configuration'});
-
+		containerEl.createEl('h2', {text: 'GitLab Configuration'});
+		
 		new Setting(containerEl)
 		.setName('Gitlab instance URL')
 		.setDesc('Use your own Gitlab instance instead of the public hosted Gitlab.')
@@ -46,25 +52,46 @@ export class GitlabSettingTab extends PluginSettingTab {
 				this.plugin.settings.host = value;
 				await this.plugin.saveSettings();
 			}));
-
-		new Setting(containerEl)
+			
+			new Setting(containerEl)
 			.setName('Personal Access Token')
 			.setDesc('Create a personal access token in your Gitlab account and enter it here.')
 			.addText(text => text
 				.setPlaceholder('Token')
 				.setValue(this.plugin.settings.token)
-			.onChange(async (value) => {
-				this.plugin.settings.token = value;
-				await this.plugin.saveSettings();
-				console.log('Gitlab Issues: Token updated');
-			}));
-
-		new Setting(containerEl)
-			.setName('Template File')
-			.setDesc('Path to an Obsidian note to use as the template.')
-			.addText(text => text
-				.setPlaceholder('your-template-file.md')
-				.setValue(this.plugin.settings.templateFile)
+				.onChange(async (value) => {
+					this.plugin.settings.token = value;
+					await this.plugin.saveSettings();
+					console.log('Gitlab Issues: Token updated');
+				}));
+				new Setting(containerEl)
+					.setName('Icon in left ribbon')
+					.addToggle(value => value
+						.setValue(this.plugin.settings.showIcon)
+						.onChange(async (value) => {
+							this.plugin.settings.showIcon = value;
+							await this.plugin.saveSettings();
+							// Update icon visibility immediately
+							if (this.plugin.updateIconVisibility) {
+								this.plugin.updateIconVisibility();
+							}
+						}));
+				// Milestones tasks inside Obsidian Issues files
+				containerEl.createEl('h2', {text: 'Issues configuration'});
+				new Setting(containerEl)
+				.setName('Milestones tasks inside Obsidian Issues files')
+				.addToggle(value => value
+					.setValue(this.plugin.settings.showIssues)
+					.onChange(async (value) => {
+						this.plugin.settings.showIssues = value;
+						await this.plugin.saveSettings();
+					}));
+					new Setting(containerEl)
+					.setName('Template File')
+					.setDesc('Path to an Obsidian note to use as the template.')
+					.addText(text => text
+						.setPlaceholder('_templates/Issue.md')
+						.setValue(this.plugin.settings.templateFile)
 				.onChange(async (value) => {
 					this.plugin.settings.templateFile = value;
 					await this.plugin.saveSettings();
@@ -74,14 +101,13 @@ export class GitlabSettingTab extends PluginSettingTab {
 			.setName('Output Folder')
 			.setDesc('Path to an Obsidian folder to write output files to.')
 			.addText(text => text
-				.setPlaceholder('/Gitlab/')
+				.setPlaceholder('/ISSUES/')
 				.setValue(normalizePath(this.plugin.settings.outputDir))
 				.onChange(async (value) => {
 					value = normalizePath(value);
 					this.plugin.settings.outputDir = value;
 					await this.plugin.saveSettings();
 				}));
-
 		new Setting(containerEl)
 			.setName('Issues Filter')
 			.setDesc('The query string used to filter the issues.')
@@ -93,20 +119,29 @@ export class GitlabSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+// Milestones tasks inside Obsidian Kanban board
+		containerEl.createEl('h2', {text: 'Kanban'});
 		new Setting(containerEl)
-			.setName('Icon in left ribbon')
-			.addToggle(value => value
-				.setValue(this.plugin.settings.showIcon)
-				.onChange(async (value) => {
-					this.plugin.settings.showIcon = value;
-					await this.plugin.saveSettings();
-					// Update icon visibility immediately
-					if (this.plugin.updateIconVisibility) {
-						this.plugin.updateIconVisibility();
-					}
-				}));
+		.setName('Milestones tasks inside Obsidian Kanban board')
+		.addToggle(value => value
+			.setValue(this.plugin.settings.showKanban)
+			.onChange(async (value) => {
+				this.plugin.settings.showKanban = value;
+				await this.plugin.saveSettings();
+		}));
+		new Setting(containerEl)
+		.setName('Kanban Output Folder')
+		.setDesc('Path to an Obsidian folder to write output milesone kanban files to.')
+		.addText(text => text
+			.setPlaceholder('/Kanban/')
+			.setValue(normalizePath(this.plugin.settings.kanbanOutputDir))
+			.onChange(async (value) => {
+				value = normalizePath(value);
+				this.plugin.settings.kanbanOutputDir = value;
+				await this.plugin.saveSettings();
+			}));
 
-		containerEl.createEl('h3', {text: 'More Information'});
+		containerEl.createEl('h2', {text: 'More Information'});
 		containerEl.createEl('a', {
 			text: 'View the Gitlab documentation',
 			href: 'https://docs.gitlab.com/ee/api/issues.html#list-issues'

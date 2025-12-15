@@ -108,7 +108,7 @@ export default class GitlabPlugin extends Plugin {
 		}
 		this.startupTimeout = window.setTimeout(() => {
 			this.fetchFromGitlab();
-		}, 30 * 1000); // after 30 seconds
+		}, 60 * 1000); // after 60 seconds
 	}
 
 	private scheduleAutomaticRefresh() {
@@ -137,23 +137,18 @@ export default class GitlabPlugin extends Plugin {
 		if (!this.settings.templateFile) {
 			// Default template
 			return `---
-gitlab_id: {{id}}
-gitlab_iid: {{iid}}
-gitlab_url: {{web_url}}
-gitlab_state: {{state}}
-gitlab_created: {{created_at}}
-gitlab_updated: {{updated_at}}
+ID: {{id}}
+State: {{state}}  
+Labels: {{labels}}  
+Assignee: {{assignee}}  
+Author: {{author}}  
+Updated:   {{updated_at}}
+
 ---
 
-# {{title}}
 
-**State:** {{state}}  
-**Labels:** {{labels}}  
-**Assignee:** {{assignee}}  
-**Author:** {{author}}  
-**Created:** {{created_at}}  
-**Updated:** {{updated_at}}  
-**GitLab URL:** [{{web_url}}]({{web_url}})
+
+- [ ]  {{title}} []({{web_url}}) 🔼 📅 {{due_date}} ⏳ 2025-12-15 🆔 {{iid}}
 
 ## Description
 
@@ -173,8 +168,6 @@ gitlab_updated: {{updated_at}}
 
 		// Fallback to default template
 		return `---
-gitlab_id: {{id}}
-gitlab_iid: {{iid}}
 gitlab_url: {{web_url}}
 gitlab_state: {{state}}
 ---
@@ -196,13 +189,11 @@ gitlab_state: {{state}}
 			'{{description}}': issue.description || '',
 			'{{state}}': issue.state || '',
 			'{{web_url}}': issue.web_url || '',
-			'{{created_at}}': issue.created_at ? new Date(issue.created_at).toLocaleString() : '',
-			'{{updated_at}}': issue.updated_at ? new Date(issue.updated_at).toLocaleString() : '',
 			'{{labels}}': issue.labels ? issue.labels.map((l: any) => typeof l === 'string' ? l : l.name).join(', ') : '',
 			'{{assignee}}': issue.assignee ? (issue.assignee.name || issue.assignee.username || '') : 'Unassigned',
 			'{{author}}': issue.author ? (issue.author.name || issue.author.username || '') : '',
 			'{{milestone}}': issue.milestone ? issue.milestone.title : '',
-			'{{due_date}}': issue.due_date || '',
+			'{{due_date}}': issue.due_date ? new Date(issue.due_date).toISOString().split('T')[0] : '',
 		};
 
 		for (const [key, value] of Object.entries(replacements)) {
@@ -216,12 +207,12 @@ gitlab_state: {{state}}
 		// Create a safe filename from issue title
 		const title = issue.title || `Issue ${issue.iid || issue.id}`;
 		const safeTitle = title
-			.replace(/[<>:"/\\|?*]/g, '-')
-			.replace(/\s+/g, '-')
+			.replace(/[<>:"/\\|?*]/g, ' ')
+			.replace(/\s+/g, ' ')
 			.substring(0, 100)
 			.trim();
 		
-		return `${issue.iid || issue.id}-${safeTitle}.md`;
+		return `${safeTitle}.md`;
 	}
 
 	private async processIssues(issues: any[]): Promise<void> {
