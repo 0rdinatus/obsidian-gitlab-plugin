@@ -1,8 +1,38 @@
-/*
+.gitlab-view {
+	padding: 4px 12px 24px;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.gitlab-toolbar {
+	display: flex;
+	gap: 8px;
+	margin: 8px 0 12px;
+}
 
-If your plugin does not need CSS, delete this file.
+.gitlab-user,
+.gitlab-message {
+	color: var(--text-muted);
+	margin: 4px 0 12px;
+}
 
-*/
+.gitlab-section {
+	margin-top: 16px;
+}
+
+.gitlab-section h3 {
+	margin-bottom: 6px;
+}
+
+.gitlab-item {
+	padding: 6px 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.gitlab-item-title {
+	font-weight: 600;
+}
+
+.gitlab-meta {
+	color: var(--text-muted);
+	font-size: var(--font-smallest);
+	margin-top: 2px;
+}

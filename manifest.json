@@ -1,9 +1,9 @@
 {
 	"id": "obsidian-gitlab",
-	"name": "Obsidian Gitlab Plugin",
-	"version": "0.1.0",
+	"name": "GitLab",
+	"version": "0.2.0",
 	"minAppVersion": "0.15.0",
-	"description": "Obsidian Gitlab Plugin to integrate Gitlab projects wiki, Issues and compatible with Tasks Plugin.",
+	"description": "Задачи, запросы на слияние, список дел и проекты GitLab в заметках Obsidian.",
 	"author": "Ordinatus",
 	"authorUrl": "https://ordinatus.ru",
 	"fundingUrl": "https://ordinatus.ru/donate",

@@ -1,150 +1,211 @@
-import {App, Plugin, PluginSettingTab, Setting, normalizePath} from "obsidian";
+import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import type { GitlabPluginApi } from './api';
+import { errorMessage } from './util';
+import type { GitlabScope, GitlabStateFilter } from './settings-model';
 
-export interface GitlabSettings {
-	host: string;
-	token: string;
-	templateFile: string;
-	outputDir: string;
-	filter: string;
-	showIcon: boolean;
-	showIssues: boolean;
-	showKanban: boolean;
-	kanbanOutputDir: string;
-}
-
-export const DEFAULT_SETTINGS: GitlabSettings = {
-	host: 'https://gitlab.com',
-	token: '',
-	templateFile: '/templates/Issue',
-	outputDir: '/Issues',
-	filter: 'state=opened',
-	showIcon: true,
-	showKanban: false,
-	showIssues: true,
-	kanbanOutputDir: '/Kanban/',
-};
+type GitlabPluginLike = Plugin & GitlabPluginApi;
 
 export class GitlabSettingTab extends PluginSettingTab {
-	plugin: Plugin & { 
-		settings: GitlabSettings; 
-		saveSettings(): Promise<void>;
-		updateIconVisibility?(): void;
-	};
+	private readonly gitlab: GitlabPluginApi;
 
-	constructor(app: App, plugin: Plugin & { settings: GitlabSettings; saveSettings(): Promise<void>; updateIconVisibility?(): void }) {
+	constructor(app: App, plugin: GitlabPluginLike) {
 		super(app, plugin);
-		this.plugin = plugin;
+		this.gitlab = plugin;
 	}
-	
+
 	display(): void {
-		const {containerEl} = this;
-		
+		const { containerEl } = this;
 		containerEl.empty();
-		containerEl.createEl('h2', {text: 'GitLab Configuration'});
-		
+
+		containerEl.createEl('h2', { text: 'Подключение' });
 		new Setting(containerEl)
-		.setName('Gitlab instance URL')
-		.setDesc('Use your own Gitlab instance instead of the public hosted Gitlab.')
-		.addText(text => text
-			.setPlaceholder('https://gitlab.com')
-			.setValue(this.plugin.settings.host)
-			.onChange(async (value) => {
-				this.plugin.settings.host = value;
-				await this.plugin.saveSettings();
-			}));
-			
-			new Setting(containerEl)
-			.setName('Personal Access Token')
-			.setDesc('Create a personal access token in your Gitlab account and enter it here.')
+			.setName('Адрес GitLab')
+			.setDesc('Корневой адрес инстанса, без /api/v4.')
 			.addText(text => text
-				.setPlaceholder('Token')
-				.setValue(this.plugin.settings.token)
+				.setPlaceholder('https://gitlab.com')
+				.setValue(this.gitlab.settings.host)
 				.onChange(async (value) => {
-					this.plugin.settings.token = value;
-					await this.plugin.saveSettings();
-					console.log('Gitlab Issues: Token updated');
+					this.gitlab.settings.host = value;
+					await this.persist();
 				}));
-				new Setting(containerEl)
-					.setName('Icon in left ribbon')
-					.addToggle(value => value
-						.setValue(this.plugin.settings.showIcon)
-						.onChange(async (value) => {
-							this.plugin.settings.showIcon = value;
-							await this.plugin.saveSettings();
-							// Update icon visibility immediately
-							if (this.plugin.updateIconVisibility) {
-								this.plugin.updateIconVisibility();
-							}
-						}));
-				// Milestones tasks inside Obsidian Issues files
-				containerEl.createEl('h2', {text: 'Issues configuration'});
-				new Setting(containerEl)
-				.setName('Milestones tasks inside Obsidian Issues files')
-				.addToggle(value => value
-					.setValue(this.plugin.settings.showIssues)
+
+		new Setting(containerEl)
+			.setName('Personal access token')
+			.setDesc('Токен хранится локально. Для чтения хватает области read_api.')
+			.addText(text => {
+				text.inputEl.type = 'password';
+				text
+					.setPlaceholder('glpat-…')
+					.setValue(this.gitlab.settings.token)
 					.onChange(async (value) => {
-						this.plugin.settings.showIssues = value;
-						await this.plugin.saveSettings();
-					}));
-					new Setting(containerEl)
-					.setName('Template File')
-					.setDesc('Path to an Obsidian note to use as the template.')
-					.addText(text => text
-						.setPlaceholder('_templates/Issue.md')
-						.setValue(this.plugin.settings.templateFile)
-				.onChange(async (value) => {
-					this.plugin.settings.templateFile = value;
-					await this.plugin.saveSettings();
+						this.gitlab.settings.token = value;
+						await this.persist();
+					});
+			});
+
+		new Setting(containerEl)
+			.setName('Проверка соединения')
+			.setDesc('Запрашивает текущего пользователя через Gitbeaker.')
+			.addButton(button => button
+				.setButtonText('Проверить токен')
+				.onClick(async () => {
+					button.setDisabled(true);
+					try {
+						const name = await this.gitlab.testConnection();
+						new Notice(`GitLab: ${name}`);
+					} catch (error) {
+						new Notice(`GitLab: ${errorMessage(error)}`);
+					} finally {
+						button.setDisabled(false);
+					}
+				}));
+
+		containerEl.createEl('h2', { text: 'Что загружать' });
+		new Setting(containerEl)
+			.setName('Область')
+			.addDropdown(drop => drop
+				.addOption('assigned_to_me', 'Назначенные мне')
+				.addOption('created_by_me', 'Созданные мной')
+				.addOption('all', 'Все доступные')
+				.setValue(this.gitlab.settings.scope)
+				.onChange(async (value: string) => {
+					this.gitlab.settings.scope = value as GitlabScope;
+					await this.persist();
 				}));
 
 		new Setting(containerEl)
-			.setName('Output Folder')
-			.setDesc('Path to an Obsidian folder to write output files to.')
+			.setName('Состояние')
+			.setDesc('Для списка дел «открытые» — pending, «закрытые» — done.')
+			.addDropdown(drop => drop
+				.addOption('opened', 'Открытые')
+				.addOption('closed', 'Закрытые')
+				.addOption('all', 'Все')
+				.setValue(this.gitlab.settings.issueState)
+				.onChange(async (value: string) => {
+					this.gitlab.settings.issueState = value as GitlabStateFilter;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Проект')
+			.setDesc('Необязательно. Числовой id или путь group/project.')
 			.addText(text => text
-				.setPlaceholder('/ISSUES/')
-				.setValue(normalizePath(this.plugin.settings.outputDir))
+				.setPlaceholder('group/project')
+				.setValue(this.gitlab.settings.project)
 				.onChange(async (value) => {
-					value = normalizePath(value);
-					this.plugin.settings.outputDir = value;
-					await this.plugin.saveSettings();
+					this.gitlab.settings.project = value;
+					await this.persist();
 				}));
+
 		new Setting(containerEl)
-			.setName('Issues Filter')
-			.setDesc('The query string used to filter the issues.')
+			.setName('Метки')
+			.setDesc('Список через запятую. Пусто — без фильтра по меткам.')
 			.addText(text => text
-				.setPlaceholder('state=opened')
-				.setValue(this.plugin.settings.filter)
+				.setPlaceholder('bug,priority::high')
+				.setValue(this.gitlab.settings.labels)
 				.onChange(async (value) => {
-					this.plugin.settings.filter = value;
-					await this.plugin.saveSettings();
+					this.gitlab.settings.labels = value;
+					await this.persist();
 				}));
 
-// Milestones tasks inside Obsidian Kanban board
-		containerEl.createEl('h2', {text: 'Kanban'});
 		new Setting(containerEl)
-		.setName('Milestones tasks inside Obsidian Kanban board')
-		.addToggle(value => value
-			.setValue(this.plugin.settings.showKanban)
-			.onChange(async (value) => {
-				this.plugin.settings.showKanban = value;
-				await this.plugin.saveSettings();
-		}));
-		new Setting(containerEl)
-		.setName('Kanban Output Folder')
-		.setDesc('Path to an Obsidian folder to write output milesone kanban files to.')
-		.addText(text => text
-			.setPlaceholder('/Kanban/')
-			.setValue(normalizePath(this.plugin.settings.kanbanOutputDir))
-			.onChange(async (value) => {
-				value = normalizePath(value);
-				this.plugin.settings.kanbanOutputDir = value;
-				await this.plugin.saveSettings();
-			}));
+			.setName('Задачи')
+			.addToggle(toggle => toggle
+				.setValue(this.gitlab.settings.syncIssues)
+				.onChange(async (value) => {
+					this.gitlab.settings.syncIssues = value;
+					await this.persist();
+				}));
 
-		containerEl.createEl('h2', {text: 'More Information'});
-		containerEl.createEl('a', {
-			text: 'View the Gitlab documentation',
-			href: 'https://docs.gitlab.com/ee/api/issues.html#list-issues'
-		});
+		new Setting(containerEl)
+			.setName('Запросы на слияние')
+			.addToggle(toggle => toggle
+				.setValue(this.gitlab.settings.syncMergeRequests)
+				.onChange(async (value) => {
+					this.gitlab.settings.syncMergeRequests = value;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Список дел')
+			.addToggle(toggle => toggle
+				.setValue(this.gitlab.settings.syncTodos)
+				.onChange(async (value) => {
+					this.gitlab.settings.syncTodos = value;
+					await this.persist();
+				}));
+
+		containerEl.createEl('h2', { text: 'Заметки' });
+		new Setting(containerEl)
+			.setName('Папка')
+			.setDesc('Сюда пишутся issues, merge-requests, todos и projects.md.')
+			.addText(text => text
+				.setPlaceholder('GitLab')
+				.setValue(this.gitlab.settings.outputDir)
+				.onChange(async (value) => {
+					this.gitlab.settings.outputDir = value;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Шаблон')
+			.setDesc('Путь к заметке. Плейсхолдеры: {{title}}, {{description}}, {{state}}, {{web_url}}, {{iid}}, {{labels}}, {{assignee}}, {{author}}, {{due_date}}, {{project}}, {{checkbox}}.')
+			.addText(text => text
+				.setPlaceholder('templates/gitlab-issue.md')
+				.setValue(this.gitlab.settings.templateFile)
+				.onChange(async (value) => {
+					this.gitlab.settings.templateFile = value;
+					await this.persist();
+				}));
+
+		containerEl.createEl('h2', { text: 'Расписание' });
+		new Setting(containerEl)
+			.setName('Синхронизировать при запуске')
+			.addToggle(toggle => toggle
+				.setValue(this.gitlab.settings.syncOnStartup)
+				.onChange(async (value) => {
+					this.gitlab.settings.syncOnStartup = value;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Интервал, минуты')
+			.setDesc('0 выключает повтор. Не больше 1440.')
+			.addText(text => text
+				.setPlaceholder('0')
+				.setValue(String(this.gitlab.settings.refreshIntervalMinutes))
+				.onChange(async (value) => {
+					const parsed = Number(value);
+					this.gitlab.settings.refreshIntervalMinutes = Number.isFinite(parsed) ? parsed : 0;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Значок на боковой панели')
+			.addToggle(toggle => toggle
+				.setValue(this.gitlab.settings.showIcon)
+				.onChange(async (value) => {
+					this.gitlab.settings.showIcon = value;
+					await this.persist();
+				}));
+
+		new Setting(containerEl)
+			.setName('Синхронизация')
+			.addButton(button => button
+				.setButtonText('Синхронизировать сейчас')
+				.setCta()
+				.onClick(async () => {
+					button.setDisabled(true);
+					try {
+						await this.gitlab.sync('all');
+					} finally {
+						button.setDisabled(false);
+					}
+				}));
+	}
+
+	private async persist(): Promise<void> {
+		await this.gitlab.saveSettings();
+		this.gitlab.onSettingsChanged();
 	}
 }

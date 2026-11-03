@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-gitlab-plugin",
-	"version": "0.1.0",
-	"description": "Sync Gitlab Issues and Wiki with Obsidian",
+	"version": "0.2.0",
+	"description": "Obsidian plugin for GitLab issues, merge requests, todos, and projects via Gitbeaker",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -13,13 +13,9 @@
 	},
 	"keywords": [],
 	"author": "Ordinatus",
-	"license": "",
+	"license": "ISC",
 	"dependencies": {
-		"@gitbeaker/rest": "^43.6.0",
-		"builtin-modules": "3.3.0",
-        "obsidian": "latest",
-        "tslib": "2.4.0",
-        "typescript": "4.7.4"
+		"@gitbeaker/rest": "43.8.0"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.2.3",
